@@ -1,0 +1,74 @@
+<h2>dカード診断（本格版）</h2>
+
+<div>
+  <p>① 月のドコモ利用額（スマホ・光・電気 合計）</p>
+  <input type="number" id="q1" placeholder="例：12000">
+
+  <p>② 年間カード利用額</p>
+  <input type="number" id="q2" placeholder="例：800000">
+
+  <p>③ 特典をどれくらい活用できそう？</p>
+  <select id="q3">
+    <option value="0">あまり使わない</option>
+    <option value="1">普通</option>
+    <option value="2">かなり使う</option>
+  </select>
+
+  <br><br>
+  <button onclick="diagnose()">診断する</button>
+</div>
+
+<h3 id="result"></h3>
+<p id="reason"></p>
+
+<script>
+function diagnose() {
+
+  // 入力値取得
+  const monthly = Number(document.getElementById("q1").value) || 0;
+  const yearlyUse = Number(document.getElementById("q2").value) || 0;
+  const benefitUse = Number(document.getElementById("q3").value) || 0;
+
+  // ===== 基本データ =====
+  const GOLD_FEE = 11000;
+  const PLAT_FEE = 29700;
+
+  // 還元率（仮ロジック）
+  const GOLD_RATE = 0.1;
+  const PLAT_RATE = 0.1;
+
+  // ===== 年間還元計算 =====
+  const goldReturn = monthly * 12 * GOLD_RATE;
+  const platReturn = monthly * 12 * PLAT_RATE;
+
+  // ===== 特典価値 =====
+  const goldBonus = 10000;
+  const platBonus = 20000;
+
+  // 利用度で調整
+  const goldBonusAdjusted = goldBonus * (benefitUse * 0.5);
+  const platBonusAdjusted = platBonus * (benefitUse * 0.5);
+
+  // ===== 実質年会費 =====
+  const goldNet = GOLD_FEE - goldReturn - goldBonusAdjusted;
+  const platNet = PLAT_FEE - platReturn - platBonusAdjusted;
+
+  // ===== 判定 =====
+  let result = "";
+  let reason = "";
+
+  if (platNet < goldNet && yearlyUse > 800000) {
+    result = "おすすめ：PLATINUM";
+    reason = "年間利用額が多く、特典価値で年会費を上回るため。";
+  } else {
+    result = "おすすめ：GOLD";
+    reason = "年会費と還元のバランスが良く、安定してお得。";
+  }
+
+  // ===== 表示 =====
+  document.getElementById("result").innerText = result;
+  document.getElementById("reason").innerText =
+    reason +
+    "\n（GOLD実質：" + Math.round(goldNet) + "円 / PLATINUM実質：" + Math.round(platNet) + "円）";
+}
+</script>
