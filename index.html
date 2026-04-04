@@ -273,23 +273,31 @@ function calc(){
 
 cards.forEach(card => {
 
-  let mobileDiscountTotal = 0;
-  let mobilePoint = 0;
+  let mobileDiscountMonthly = mobileDiscount(plan, card);
+  let mobileDiscountTotal = mobileDiscountMonthly * 12;
+
+  let mobileBase = floor100(mobileFee);
+  let mobileRateVal = mobileRate(plan, card);
+  let mobilePointMonthly = mobileBase * mobileRateVal;
+  let mobilePoint = mobilePointMonthly * 12;
+
+  let hikariPointMonthly = 0;
   let hikariPoint = 0;
+  let hikariBase = 0;
+
+  let denkiPointMonthly = 0;
   let denkiPoint = 0;
+  let denkiBase = 0;
+
   let bonus = 0;
   let fee = annualFee(card);
-
-  // --- 携帯割引 ---
-  mobileDiscountTotal = mobileDiscount(plan, card) * 12;
-
-  // --- 携帯還元 ---
-  mobilePoint = floor100(mobileFee) * mobileRate(plan, card) * 12;
 
   // --- 光 ---
   if(document.getElementById("hikari").value==="yes"){
     const feeH = Number(document.getElementById("hikariFee").value);
-    hikariPoint = floor100(feeH) * hikariRate(card) * 12;
+    hikariBase = floor100(feeH);
+    hikariPointMonthly = hikariBase * hikariRate(card);
+    hikariPoint = hikariPointMonthly * 12;
   }
 
   // --- でんき ---
@@ -299,8 +307,10 @@ cards.forEach(card => {
     const gas = document.getElementById("gas").value;
     const feeD = Number(document.getElementById("denkiFee").value);
 
+    denkiBase = floor100(feeD);
     const rate = denkiRate(area, planDenki, gas, card);
-    denkiPoint = floor100(feeD) * rate * 12;
+    denkiPointMonthly = denkiBase * rate;
+    denkiPoint = denkiPointMonthly * 12;
   }
 
   // --- 年間特典 ---
@@ -315,8 +325,7 @@ cards.forEach(card => {
     if(yearly >= 4000000) bonus += 10000;
   }
 
-  // --- 合計 ---
-  let total = 
+  let total =
     mobileDiscountTotal +
     mobilePoint +
     hikariPoint +
@@ -328,12 +337,27 @@ cards.forEach(card => {
   <div class="result-card">
     <b>${card}</b><br><br>
 
-    📱 携帯割引：${mobileDiscountTotal.toLocaleString()}円<br>
-    📱 携帯還元：${Math.floor(mobilePoint).toLocaleString()}円<br>
-    🌐 ドコモ光：${Math.floor(hikariPoint).toLocaleString()}円<br>
-    ⚡ ドコモでんき：${Math.floor(denkiPoint).toLocaleString()}円<br>
+    📱 プラン割引：${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月 = ${mobileDiscountTotal.toLocaleString()}円<br>
+
+    📱 ケータイ料金還元：${mobileBase.toLocaleString()}円 × ${Math.round(mobileRateVal*100)}% 
+    = ${Math.floor(mobilePointMonthly).toLocaleString()}円/月 ×12 = ${Math.floor(mobilePoint).toLocaleString()}円<br>
+
+    🌐 ドコモ光：
+    ${hikariBase ? `${hikariBase.toLocaleString()}円 × ${Math.round(hikariRate(card)*100)}% 
+    = ${Math.floor(hikariPointMonthly).toLocaleString()}円/月 ×12 = ${Math.floor(hikariPoint).toLocaleString()}円` : "0円"}<br>
+
+    ⚡ ドコモでんき：
+    ${denkiBase ? `${denkiBase.toLocaleString()}円 × ${Math.round(denkiRate(
+      document.getElementById("area").value,
+      document.getElementById("planDenki").value,
+      document.getElementById("gas").value,
+      card
+    )*100)}% 
+    = ${Math.floor(denkiPointMonthly).toLocaleString()}円/月 ×12 = ${Math.floor(denkiPoint).toLocaleString()}円` : "0円"}<br>
+
     🎁 年間特典：${bonus.toLocaleString()}円<br>
-    💳 年会費：- ${fee.toLocaleString()}円<br>
+
+    💳 年会費：-${fee.toLocaleString()}円<br>
 
     <hr>
 
@@ -341,7 +365,8 @@ cards.forEach(card => {
   </div>
   `;
 });
- document.getElementById("result").innerHTML = html;
+
+document.getElementById("result").innerHTML = html;
   document.getElementById("result").classList.remove("hidden");
 }
 </script>
