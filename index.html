@@ -192,17 +192,22 @@ function hikariRate(card){
 
 function denkiRate(area, plan, gas, card){
 
-  const areaGroupA = ["中部、関西、九州"];
-  const areaGroupB = ["北海道、東北、東京、北陸、中国、四国"];
+  const isA = area === "中部、関西、九州";
+  const isB = area === "北海道、東北、東京、北陸、中国、四国";
 
-  const isA = areaGroupA.includes(area);
-  const isB = areaGroupB.includes(area);
+  // --- でんきなし ---
+  if(document.getElementById("denki").value==="no") return 0;
 
+  // =====================
+  // PLATINUM
+  // =====================
   if(card==="dカードPLATINUM"){
+
     if(plan==="Basic"){
       if(gas==="yes") return 0.04;
       return 0.02;
     }
+
     if(plan==="Green"){
       if(isA){
         if(gas==="yes") return 0.22;
@@ -215,11 +220,16 @@ function denkiRate(area, plan, gas, card){
     }
   }
 
+  // =====================
+  // GOLD / GOLD U
+  // =====================
   if(card==="dカードGOLD" || card==="dカードGOLD U"){
+
     if(plan==="Basic"){
       if(gas==="yes") return 0.04;
       return 0.02;
     }
+
     if(plan==="Green"){
       if(isA){
         if(gas==="yes") return 0.12;
@@ -232,20 +242,17 @@ function denkiRate(area, plan, gas, card){
     }
   }
 
+  // =====================
+  // dカード
+  // =====================
   if(card==="dカード"){
+
     if(plan==="Basic"){
-      if(gas==="yes") return 0.04;
-      return 0.02;
+      return 0.01;
     }
+
     if(plan==="Green"){
-      if(isA){
-        if(gas==="yes") return 0.07;
-        return 0.05;
-      }
-      if(isB){
-        if(gas==="yes") return 0.06;
-        return 0.04;
-      }
+      return 0.02;
     }
   }
 
