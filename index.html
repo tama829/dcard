@@ -1,74 +1,251 @@
-<h2>dカード診断（本格版）</h2>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>dカード最適診断</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont;
+  background: #f5f6fa;
+  padding: 20px;
+}
 
-<div>
-  <p>① 月のドコモ利用額（スマホ・光・電気 合計）</p>
-  <input type="number" id="q1" placeholder="例：12000">
+.container {
+  max-width: 600px;
+  margin: auto;
+}
 
-  <p>② 年間カード利用額</p>
-  <input type="number" id="q2" placeholder="例：800000">
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
 
-  <p>③ 特典をどれくらい活用できそう？</p>
-  <select id="q3">
-    <option value="0">あまり使わない</option>
-    <option value="1">普通</option>
-    <option value="2">かなり使う</option>
-  </select>
+h1 { text-align: center; }
 
-  <br><br>
-  <button onclick="diagnose()">診断する</button>
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #e6002d;
+  color: white;
+  font-size: 16px;
+}
+
+.hidden { display: none; }
+
+.result-card {
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 10px;
+  background: #f0f3ff;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>dカード診断</h1>
+
+<div class="card" id="form">
+
+<h3>dカードの保有状況</h3>
+<select id="hasCard">
+<option value="no">持っていない</option>
+<option value="yes">持っている</option>
+</select>
+
+<div id="cardArea" class="hidden">
+<h3>カード種類</h3>
+<select id="cardType">
+<option>dカード</option>
+<option>dカードGOLD</option>
+<option>dカードGOLD U</option>
+<option>dカードPLATINUM</option>
+</select>
 </div>
 
-<h3 id="result"></h3>
-<p id="reason"></p>
+<h3>ケータイプラン</h3>
+<select id="plan">
+<option>ドコモ MAX</option>
+<option>ドコモ ポイ活 MAX</option>
+<option>ドコモ ポイ活 20</option>
+<option>ドコモ mini</option>
+<option>eximo ポイ活</option>
+<option>eximo</option>
+<option>irumo(0.5GBを除く)</option>
+<option>irumo(0.5GB)</option>
+<option>5Gギガホプレミア</option>
+<option>5Gギガホ</option>
+<option>5Gギガライト</option>
+<option>ギガホプレミア</option>
+<option>ギガホ(定期契約なし)</option>
+<option>ギガライト(定期契約なし)</option>
+<option>はじめてスマホプラン</option>
+<option>U15はじめてスマホプラン</option>
+<option>ケータイプラン(定期契約なし)</option>
+<option>ahamo</option>
+</select>
+
+<h3>ケータイ料金（月額）</h3>
+<input type="number" id="mobileFee">
+
+<h3>ドコモ光/home5G</h3>
+<select id="hikari">
+<option value="no">なし</option>
+<option value="yes">あり</option>
+</select>
+
+<input type="number" id="hikariFee" placeholder="月額料金" class="hidden">
+
+<h3>ドコモでんき</h3>
+<select id="denki">
+<option value="no">なし</option>
+<option value="yes">あり</option>
+</select>
+
+<div id="denkiArea" class="hidden">
+<select id="area">
+<option>東京</option>
+<option>関西</option>
+<option>中部</option>
+<option>九州</option>
+<option>北海道</option>
+<option>東北</option>
+<option>北陸</option>
+<option>中国</option>
+<option>四国</option>
+</select>
+
+<select id="planDenki">
+<option>Basic</option>
+<option>Green</option>
+</select>
+
+<select id="gas">
+<option value="no">ガスなし</option>
+<option value="yes">ガスあり</option>
+</select>
+
+<input type="number" id="denkiFee" placeholder="月額料金">
+</div>
+
+<h3>月々の利用額</h3>
+<input type="number" id="usage">
+
+<br><br>
+<button onclick="calc()">診断する</button>
+
+</div>
+
+<div id="result" class="card hidden"></div>
+
+</div>
 
 <script>
-function diagnose() {
+document.getElementById("hasCard").onchange = e => {
+  document.getElementById("cardArea").classList.toggle("hidden", e.target.value==="no");
+};
 
-  // 入力値取得
-  const monthly = Number(document.getElementById("q1").value) || 0;
-  const yearlyUse = Number(document.getElementById("q2").value) || 0;
-  const benefitUse = Number(document.getElementById("q3").value) || 0;
+document.getElementById("hikari").onchange = e => {
+  document.getElementById("hikariFee").classList.toggle("hidden", e.target.value==="no");
+};
 
-  // ===== 基本データ =====
-  const GOLD_FEE = 11000;
-  const PLAT_FEE = 29700;
+document.getElementById("denki").onchange = e => {
+  document.getElementById("denkiArea").classList.toggle("hidden", e.target.value==="no");
+};
 
-  // 還元率（仮ロジック）
-  const GOLD_RATE = 0.1;
-  const PLAT_RATE = 0.1;
+function floor100(v){ return Math.floor(v/100)*100; }
 
-  // ===== 年間還元計算 =====
-  const goldReturn = monthly * 12 * GOLD_RATE;
-  const platReturn = monthly * 12 * PLAT_RATE;
+function mobileDiscount(plan, card){
+  if(["irumo(0.5GB)","ahamo"].includes(plan)) return 0;
 
-  // ===== 特典価値 =====
-  const goldBonus = 10000;
-  const platBonus = 20000;
-
-  // 利用度で調整
-  const goldBonusAdjusted = goldBonus * (benefitUse * 0.5);
-  const platBonusAdjusted = platBonus * (benefitUse * 0.5);
-
-  // ===== 実質年会費 =====
-  const goldNet = GOLD_FEE - goldReturn - goldBonusAdjusted;
-  const platNet = PLAT_FEE - platReturn - platBonusAdjusted;
-
-  // ===== 判定 =====
-  let result = "";
-  let reason = "";
-
-  if (platNet < goldNet && yearlyUse > 800000) {
-    result = "おすすめ：PLATINUM";
-    reason = "年間利用額が多く、特典価値で年会費を上回るため。";
-  } else {
-    result = "おすすめ：GOLD";
-    reason = "年会費と還元のバランスが良く、安定してお得。";
+  if(["ドコモ MAX","ドコモ ポイ活 MAX","ドコモ ポイ活 20","ドコモ mini"].includes(plan)){
+    if(["dカードPLATINUM","dカードGOLD","dカードGOLD U"].includes(card)) return 550;
+    if(card==="dカード") return 220;
   }
 
-  // ===== 表示 =====
-  document.getElementById("result").innerText = result;
-  document.getElementById("reason").innerText =
-    reason +
-    "\n（GOLD実質：" + Math.round(goldNet) + "円 / PLATINUM実質：" + Math.round(platNet) + "円）";
+  return 187;
+}
+
+function mobileRate(plan, card){
+  if(plan==="ahamo") return 0;
+
+  const highPlans = ["ドコモ mini","irumo(0.5GBを除く)","irumo(0.5GB)"];
+
+  if(!highPlans.includes(plan)){
+    if(card==="dカードPLATINUM") return 0.2;
+    if(card==="dカードGOLD") return 0.1;
+    if(card==="dカードGOLD U") return 0.05;
+    if(card==="dカード") return 0.01;
+  }
+
+  if(highPlans.includes(plan)){
+    if(["dカードPLATINUM","dカードGOLD","dカードGOLD U"].includes(card)) return 0.01;
+    return 0.005;
+  }
+}
+
+function hikariRate(card){
+  if(card==="dカードPLATINUM") return 0.2;
+  if(card==="dカードGOLD") return 0.1;
+  if(card==="dカードGOLD U") return 0.05;
+  if(card==="dカード") return 0.01;
+}
+
+function calc(){
+
+  const hasCard = document.getElementById("hasCard").value;
+  const plan = document.getElementById("plan").value;
+  const mobileFee = Number(document.getElementById("mobileFee").value);
+  const usage = Number(document.getElementById("usage").value);
+
+  const cards = ["dカード","dカードGOLD","dカードGOLD U","dカードPLATINUM"];
+
+  let html = "<h2>診断結果</h2>";
+
+  cards.forEach(card => {
+
+    let total = 0;
+
+    // 携帯割引
+    total += mobileDiscount(plan, card) * 12;
+
+    // 携帯還元
+    total += floor100(mobileFee) * mobileRate(plan, card) * 12;
+
+    // 光
+    if(document.getElementById("hikari").value==="yes"){
+      const fee = Number(document.getElementById("hikariFee").value);
+      total += floor100(fee) * hikariRate(card) * 12;
+    }
+
+    // 年間特典
+    const yearly = usage*12;
+    if(yearly>=1000000){
+      if(card==="dカードPLATINUM") total += 10000;
+      if(card==="dカードGOLD") total += 10000;
+      if(card==="dカードPLATINUM" && yearly>=2000000) total += 10000;
+      if(card==="dカードPLATINUM" && yearly>=3000000) total += 10000;
+      if(card==="dカードPLATINUM" && yearly>=4000000) total += 10000;
+    }
+
+    html += `
+    <div class="result-card">
+      <b>${card}</b><br>
+      年間お得額：約 ${Math.floor(total).toLocaleString()} 円
+    </div>
+    `;
+  });
+
+  document.getElementById("result").innerHTML = html;
+  document.getElementById("result").classList.remove("hidden");
 }
 </script>
+
+</body>
+</html>
