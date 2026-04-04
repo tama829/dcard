@@ -152,7 +152,7 @@ document.getElementById("denki").onchange = e => {
   document.getElementById("denkiArea").classList.toggle("hidden", e.target.value==="no");
 };
 
-function floor100(v){ return Math.floor(v/100)*100; }
+function floor100(v){ return Math.floor(v/1000)*1000; }
 
 function mobileDiscount(plan, card){
   if(["irumo(0.5GB)","ahamo"].includes(plan)) return 0;
@@ -333,37 +333,39 @@ cards.forEach(card => {
     bonus -
     fee;
 
-  html += `
-  <div class="result-card">
-    <b>${card}</b><br><br>
+html += `
+<div class="result-card">
+  <b>${card}</b><br><br>
 
-    📱 プラン割引：${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月 = ${mobileDiscountTotal.toLocaleString()}円<br>
+  📱 携帯割引：
+  ${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月＝${mobileDiscountTotal.toLocaleString()}円<br>
 
-    📱 ケータイ料金還元：${mobileBase.toLocaleString()}円 × ${Math.round(mobileRateVal*100)}% 
-    = ${Math.floor(mobilePointMonthly).toLocaleString()}円/月 ×12 = ${Math.floor(mobilePoint).toLocaleString()}円<br>
+  📱 携帯還元：
+  ${mobileBase.toLocaleString()}pt × ${Math.round(mobileRateVal*100)}%
+  ＝${Math.floor(mobilePointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(mobilePoint).toLocaleString()}pt<br>
 
-    🌐 ドコモ光：
-    ${hikariBase ? `${hikariBase.toLocaleString()}円 × ${Math.round(hikariRate(card)*100)}% 
-    = ${Math.floor(hikariPointMonthly).toLocaleString()}円/月 ×12 = ${Math.floor(hikariPoint).toLocaleString()}円` : "0円"}<br>
+  🌐 ドコモ光：
+  ${hikariBase ? `${hikariBase.toLocaleString()}pt × ${Math.round(hikariRate(card)*100)}%
+  ＝${Math.floor(hikariPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(hikariPoint).toLocaleString()}pt` : "0pt"}<br>
 
-    ⚡ ドコモでんき：
-    ${denkiBase ? `${denkiBase.toLocaleString()}円 × ${Math.round(denkiRate(
-      document.getElementById("area").value,
-      document.getElementById("planDenki").value,
-      document.getElementById("gas").value,
-      card
-    )*100)}% 
-    = ${Math.floor(denkiPointMonthly).toLocaleString()}円/月 ×12 = ${Math.floor(denkiPoint).toLocaleString()}円` : "0円"}<br>
+  ⚡ ドコモでんき：
+  ${denkiBase ? `${denkiBase.toLocaleString()}pt × ${Math.round(denkiRate(
+    document.getElementById("area").value,
+    document.getElementById("planDenki").value,
+    document.getElementById("gas").value,
+    card
+  )*100)}%
+  ＝${Math.floor(denkiPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(denkiPoint).toLocaleString()}pt` : "0pt"}<br>
 
-    🎁 年間特典：${bonus.toLocaleString()}円<br>
+  🎁 年間特典：${bonus.toLocaleString()}円<br>
 
-    💳 年会費：-${fee.toLocaleString()}円<br>
+  💳 年会費：-${fee.toLocaleString()}円<br>
 
-    <hr>
+  <hr>
 
-    <b>👉 実質お得額：${Math.floor(total).toLocaleString()}円</b>
-  </div>
-  `;
+  <b>👉 実質お得額：${Math.floor(total).toLocaleString()}円</b>
+</div>
+`;
 });
 
 document.getElementById("result").innerHTML = html;
