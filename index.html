@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>dカード最適診断</title>
+<title>dカード診断</title>
 <style>
 body {
   font-family: -apple-system, BlinkMacSystemFont;
@@ -53,7 +53,7 @@ button {
 
 <div class="card" id="form">
 
-<h3>dカードの保有状況</h3>
+<h3>dカード保有状況</h3>
 <select id="hasCard">
 <option value="no">持っていない</option>
 <option value="yes">持っている</option>
@@ -69,7 +69,7 @@ button {
 </select>
 </div>
 
-<h3>ケータイプラン</h3>
+<h3>ケータイ料金プラン</h3>
 <select id="plan">
 <option>ドコモ MAX</option>
 <option>ドコモ ポイ活 MAX</option>
@@ -91,7 +91,7 @@ button {
 <option>ahamo</option>
 </select>
 
-<h3>ケータイ料金（月額）</h3>
+<h3>ケータイ料金(月額)</h3>
 <input type="number" id="mobileFee">
 
 <h3>ドコモ光/home5G</h3>
@@ -110,15 +110,8 @@ button {
 
 <div id="denkiArea" class="hidden">
 <select id="area">
-<option>東京</option>
-<option>関西</option>
-<option>中部</option>
-<option>九州</option>
-<option>北海道</option>
-<option>東北</option>
-<option>北陸</option>
-<option>中国</option>
-<option>四国</option>
+<option>中部、関西、九州</option>
+<option> 北海道、東北、東京、北陸、中国、四国 </option>
 </select>
 
 <select id="planDenki">
@@ -197,6 +190,76 @@ function hikariRate(card){
   if(card==="dカード") return 0.01;
 }
 
+function denkiRate(area, plan, gas, card){
+
+  const areaGroupA = ["中部、関西、九州"];
+  const areaGroupB = ["北海道、東北、東京、北陸、中国、四国"];
+
+  const isA = areaGroupA.includes(area);
+  const isB = areaGroupB.includes(area);
+
+  if(card==="dカードPLATINUM"){
+    if(plan==="Basic"){
+      if(gas==="yes") return 0.04;
+      return 0.02;
+    }
+    if(plan==="Green"){
+      if(isA){
+        if(gas==="yes") return 0.22;
+        return 0.20;
+      }
+      if(isB){
+        if(gas==="yes") return 0.14;
+        return 0.12;
+      }
+    }
+  }
+
+  if(card==="dカードGOLD" || card==="dカードGOLD U"){
+    if(plan==="Basic"){
+      if(gas==="yes") return 0.04;
+      return 0.02;
+    }
+    if(plan==="Green"){
+      if(isA){
+        if(gas==="yes") return 0.12;
+        return 0.10;
+      }
+      if(isB){
+        if(gas==="yes") return 0.08;
+        return 0.06;
+      }
+    }
+  }
+
+  if(card==="dカード"){
+    if(plan==="Basic"){
+      if(gas==="yes") return 0.04;
+      return 0.02;
+    }
+    if(plan==="Green"){
+      if(isA){
+        if(gas==="yes") return 0.07;
+        return 0.05;
+      }
+      if(isB){
+        if(gas==="yes") return 0.06;
+        return 0.04;
+      }
+    }
+  }
+
+  return 0;
+}
+
+function annualFee(card){
+  if(card==="dカード") return 0;
+  if(card==="dカードGOLD U") return 3300;
+  if(card==="dカードGOLD") return 11000;
+  if(card==="dカードPLATINUM") return 29700;
+  return 0;
+}
+
 function calc(){
 
   const hasCard = document.getElementById("hasCard").value;
@@ -208,41 +271,77 @@ function calc(){
 
   let html = "<h2>診断結果</h2>";
 
-  cards.forEach(card => {
+cards.forEach(card => {
 
-    let total = 0;
+  let mobileDiscountTotal = 0;
+  let mobilePoint = 0;
+  let hikariPoint = 0;
+  let denkiPoint = 0;
+  let bonus = 0;
+  let fee = annualFee(card);
 
-    // 携帯割引
-    total += mobileDiscount(plan, card) * 12;
+  // --- 携帯割引 ---
+  mobileDiscountTotal = mobileDiscount(plan, card) * 12;
 
-    // 携帯還元
-    total += floor100(mobileFee) * mobileRate(plan, card) * 12;
+  // --- 携帯還元 ---
+  mobilePoint = floor100(mobileFee) * mobileRate(plan, card) * 12;
 
-    // 光
-    if(document.getElementById("hikari").value==="yes"){
-      const fee = Number(document.getElementById("hikariFee").value);
-      total += floor100(fee) * hikariRate(card) * 12;
-    }
+  // --- 光 ---
+  if(document.getElementById("hikari").value==="yes"){
+    const feeH = Number(document.getElementById("hikariFee").value);
+    hikariPoint = floor100(feeH) * hikariRate(card) * 12;
+  }
 
-    // 年間特典
-    const yearly = usage*12;
-    if(yearly>=1000000){
-      if(card==="dカードPLATINUM") total += 10000;
-      if(card==="dカードGOLD") total += 10000;
-      if(card==="dカードPLATINUM" && yearly>=2000000) total += 10000;
-      if(card==="dカードPLATINUM" && yearly>=3000000) total += 10000;
-      if(card==="dカードPLATINUM" && yearly>=4000000) total += 10000;
-    }
+  // --- でんき ---
+  if(document.getElementById("denki").value==="yes"){
+    const area = document.getElementById("area").value;
+    const planDenki = document.getElementById("planDenki").value;
+    const gas = document.getElementById("gas").value;
+    const feeD = Number(document.getElementById("denkiFee").value);
 
-    html += `
-    <div class="result-card">
-      <b>${card}</b><br>
-      年間お得額：約 ${Math.floor(total).toLocaleString()} 円
-    </div>
-    `;
-  });
+    const rate = denkiRate(area, planDenki, gas, card);
+    denkiPoint = floor100(feeD) * rate * 12;
+  }
 
-  document.getElementById("result").innerHTML = html;
+  // --- 年間特典 ---
+  const yearly = usage * 12;
+
+  if(yearly >= 1000000){
+    if(card==="dカードGOLD" || card==="dカードPLATINUM") bonus += 10000;
+  }
+  if(card==="dカードPLATINUM"){
+    if(yearly >= 2000000) bonus += 10000;
+    if(yearly >= 3000000) bonus += 10000;
+    if(yearly >= 4000000) bonus += 10000;
+  }
+
+  // --- 合計 ---
+  let total = 
+    mobileDiscountTotal +
+    mobilePoint +
+    hikariPoint +
+    denkiPoint +
+    bonus -
+    fee;
+
+  html += `
+  <div class="result-card">
+    <b>${card}</b><br><br>
+
+    📱 携帯割引：${mobileDiscountTotal.toLocaleString()}円<br>
+    📱 携帯還元：${Math.floor(mobilePoint).toLocaleString()}円<br>
+    🌐 ドコモ光：${Math.floor(hikariPoint).toLocaleString()}円<br>
+    ⚡ ドコモでんき：${Math.floor(denkiPoint).toLocaleString()}円<br>
+    🎁 年間特典：${bonus.toLocaleString()}円<br>
+    💳 年会費：- ${fee.toLocaleString()}円<br>
+
+    <hr>
+
+    <b>👉 実質お得額：${Math.floor(total).toLocaleString()}円</b>
+  </div>
+  `;
+});
+ document.getElementById("result").innerHTML = html;
   document.getElementById("result").classList.remove("hidden");
 }
 </script>
