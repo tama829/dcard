@@ -339,14 +339,14 @@ if(total >= 0){
   let monthlyCost = Math.floor(total / 12);
 
   let hosho = 0;
-  if(card==="dカード") hosho = 30000;
-  if(card==="dカードGOLD U") hosho = 100000;
-  if(card==="dカードGOLD") hosho = 120000;
-  if(card==="dカードPLATINUM") hosho = 200000;
+  if(card==="dカード") hosho = 3;
+  if(card==="dカードGOLD U") hosho = 10;
+  if(card==="dカードGOLD") hosho = 12;
+  if(card==="dカードPLATINUM") hosho = 20;
 
   extraText = `
   <br>
-  <b>👉 実質月額 ${monthlyCost.toLocaleString()}円でケータイ補償 ${hosho.toLocaleString()}円分</b>
+  <b>👉 実質月額 ${monthlyCost.toLocaleString()}円でケータイ補償 ${hosho.toLocaleString()}万円分</b>
   `;
 }
 
