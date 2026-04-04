@@ -205,13 +205,19 @@ function denkiRate(area, plan, gas, card){
   const isA = area === "中部、関西、九州";
   const isB = area === "北海道、東北、東京、北陸、中国、四国";
 
+  // でんきなし
   if(document.getElementById("denki").value==="no") return 0;
 
+  // =====================
+  // PLATINUM
+  // =====================
   if(card==="dカードPLATINUM"){
+
     if(plan==="Basic"){
       if(gas==="yes") return 0.04;
       return 0.02;
     }
+
     if(plan==="Green"){
       if(isA){
         if(gas==="yes") return 0.22;
@@ -224,11 +230,16 @@ function denkiRate(area, plan, gas, card){
     }
   }
 
+  // =====================
+  // GOLD / GOLD U
+  // =====================
   if(card==="dカードGOLD" || card==="dカードGOLD U"){
+
     if(plan==="Basic"){
       if(gas==="yes") return 0.04;
       return 0.02;
     }
+
     if(plan==="Green"){
       if(isA){
         if(gas==="yes") return 0.12;
@@ -241,9 +252,26 @@ function denkiRate(area, plan, gas, card){
     }
   }
 
+  // =====================
+  // dカード
+  // =====================
   if(card==="dカード"){
-    if(plan==="Basic") return 0.01;
-    if(plan==="Green") return 0.02;
+
+    if(plan==="Basic"){
+      if(gas==="yes") return 0.04;
+      return 0.02;
+    }
+
+    if(plan==="Green"){
+      if(isA){
+        if(gas==="yes") return 0.07;
+        return 0.05;
+      }
+      if(isB){
+        if(gas==="yes") return 0.06;
+        return 0.04;
+      }
+    }
   }
 
   return 0;
@@ -332,15 +360,15 @@ ${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月＝${mobileDiscountTotal.
 
   let mobileText = mobilePoint > 0 ? `
 📱 ケータイ料金：
-${Math.floor(mobilePointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(mobilePoint).toLocaleString()} pt <span class="badge">${Math.round(mobileRateVal*100)}%</span><br>` : "";
+${Math.floor(mobilePointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(mobilePoint).toLocaleString()} pt <span class="badge">${Math.round(mobileRateVal*100)}%還元</span><br>` : "";
 
   let hikariText = hikariPoint > 0 ? `
 🌐 ドコモ光：
-${Math.floor(hikariPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(hikariPoint).toLocaleString()} pt <span class="badge">${Math.round(hikariRate(card)*100)}%</span><br>` : "";
+${Math.floor(hikariPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(hikariPoint).toLocaleString()} pt <span class="badge">${Math.round(hikariRate(card)*100)}%還元</span><br>` : "";
 
   let denkiText = denkiPoint > 0 ? `
 ⚡ ドコモでんき：
-${Math.floor(denkiPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(denkiPoint).toLocaleString()} pt <span class="badge">${Math.round(rate*100)}%</span><br>` : "";
+${Math.floor(denkiPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(denkiPoint).toLocaleString()} pt <span class="badge">${Math.round(rate*100)}%還元</span><br>` : "";
 
   let bonusText = bonus > 0 ? `
 🎁 年間ご利用額特典：
