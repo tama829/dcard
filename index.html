@@ -44,16 +44,15 @@ button {
   background: #f0f3ff;
 }
 
-.rate {
+/* ★追加：％バッジ */
+.badge {
   display: inline-block;
-  margin-left: 6px;
   padding: 2px 6px;
-  font-size: 12px;
+  margin-left: 6px;
+  border: 1px solid #999;
   border-radius: 6px;
-  background: #e6002d;
-  color: white;
+  font-size: 12px;
 }
-
 </style>
 </head>
 
@@ -206,19 +205,13 @@ function denkiRate(area, plan, gas, card){
   const isA = area === "中部、関西、九州";
   const isB = area === "北海道、東北、東京、北陸、中国、四国";
 
-  // --- でんきなし ---
   if(document.getElementById("denki").value==="no") return 0;
 
-  // =====================
-  // PLATINUM
-  // =====================
   if(card==="dカードPLATINUM"){
-
     if(plan==="Basic"){
       if(gas==="yes") return 0.04;
       return 0.02;
     }
-
     if(plan==="Green"){
       if(isA){
         if(gas==="yes") return 0.22;
@@ -231,16 +224,11 @@ function denkiRate(area, plan, gas, card){
     }
   }
 
-  // =====================
-  // GOLD / GOLD U
-  // =====================
   if(card==="dカードGOLD" || card==="dカードGOLD U"){
-
     if(plan==="Basic"){
       if(gas==="yes") return 0.04;
       return 0.02;
     }
-
     if(plan==="Green"){
       if(isA){
         if(gas==="yes") return 0.12;
@@ -253,18 +241,9 @@ function denkiRate(area, plan, gas, card){
     }
   }
 
-  // =====================
-  // dカード
-  // =====================
   if(card==="dカード"){
-
-    if(plan==="Basic"){
-      return 0.01;
-    }
-
-    if(plan==="Green"){
-      return 0.02;
-    }
+    if(plan==="Basic") return 0.01;
+    if(plan==="Green") return 0.02;
   }
 
   return 0;
@@ -280,7 +259,6 @@ function annualFee(card){
 
 function calc(){
 
-  const hasCard = document.getElementById("hasCard").value;
   const plan = document.getElementById("plan").value;
   const mobileFee = Number(document.getElementById("mobileFee").value);
   const usage = Number(document.getElementById("usage").value);
@@ -301,37 +279,33 @@ cards.forEach(card => {
 
   let hikariPointMonthly = 0;
   let hikariPoint = 0;
-  let hikariBase = 0;
 
   let denkiPointMonthly = 0;
   let denkiPoint = 0;
-  let denkiBase = 0;
+  let rate = 0;
 
   let bonus = 0;
   let fee = annualFee(card);
 
-  // --- 光 ---
   if(document.getElementById("hikari").value==="yes"){
     const feeH = Number(document.getElementById("hikariFee").value);
-    hikariBase = floor100(feeH);
+    let hikariBase = floor100(feeH);
     hikariPointMonthly = hikariBase * hikariRate(card);
     hikariPoint = hikariPointMonthly * 12;
   }
 
-  // --- でんき ---
   if(document.getElementById("denki").value==="yes"){
     const area = document.getElementById("area").value;
     const planDenki = document.getElementById("planDenki").value;
     const gas = document.getElementById("gas").value;
     const feeD = Number(document.getElementById("denkiFee").value);
 
-    denkiBase = floor100(feeD);
-    const rate = denkiRate(area, planDenki, gas, card);
+    let denkiBase = floor100(feeD);
+    rate = denkiRate(area, planDenki, gas, card);
     denkiPointMonthly = denkiBase * rate;
     denkiPoint = denkiPointMonthly * 12;
   }
 
-  // --- 年間特典 ---
   const yearly = usage * 12;
 
   if(yearly >= 1000000){
@@ -343,85 +317,68 @@ cards.forEach(card => {
     if(yearly >= 4000000) bonus += 10000;
   }
 
-let total =
-  fee -
-  mobileDiscountTotal -
-  mobilePoint -
-  hikariPoint -
-  denkiPoint -
-  bonus;
+  let total =
+    fee -
+    mobileDiscountTotal -
+    mobilePoint -
+    hikariPoint -
+    denkiPoint -
+    bonus;
 
-let extraText = "";
+  // ★表示制御
+  let discountText = mobileDiscountTotal > 0 ? `
+📱 プラン割引：
+${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月＝${mobileDiscountTotal.toLocaleString()}円<br>` : "";
 
-if(total >= 0){
-  let monthlyCost = Math.floor(total / 12);
+  let mobileText = mobilePoint > 0 ? `
+📱 ケータイ料金：
+${Math.floor(mobilePointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(mobilePoint).toLocaleString()} pt <span class="badge">${Math.round(mobileRateVal*100)}%</span><br>` : "";
 
-  let hosho = 0;
-  if(card==="dカード") hosho = 3;
-  if(card==="dカードGOLD U") hosho = 10;
-  if(card==="dカードGOLD") hosho = 12;
-  if(card==="dカードPLATINUM") hosho = 20;
+  let hikariText = hikariPoint > 0 ? `
+🌐 ドコモ光：
+${Math.floor(hikariPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(hikariPoint).toLocaleString()} pt <span class="badge">${Math.round(hikariRate(card)*100)}%</span><br>` : "";
 
-  extraText = `
-  <br>
-  <b>👉 実質月額 ${monthlyCost.toLocaleString()}円でケータイ補償 ${hosho.toLocaleString()}万円分</b>
-  `;
-}
+  let denkiText = denkiPoint > 0 ? `
+⚡ ドコモでんき：
+${Math.floor(denkiPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(denkiPoint).toLocaleString()} pt <span class="badge">${Math.round(rate*100)}%</span><br>` : "";
 
-html += `
+  let bonusText = bonus > 0 ? `
+🎁 年間ご利用額特典：
+${bonus.toLocaleString()}円<br>` : "";
+
+  let extraText = "";
+  if(total >= 0){
+    let monthlyCost = Math.floor(total / 12);
+
+    let hosho = 0;
+    if(card==="dカード") hosho = 3;
+    if(card==="dカードGOLD U") hosho = 10;
+    if(card==="dカードGOLD") hosho = 12;
+    if(card==="dカードPLATINUM") hosho = 20;
+
+    extraText = `<br><b>👉 実質月額 ${monthlyCost.toLocaleString()}円でケータイ補償 ${hosho}万円分</b>`;
+  }
+
+  html += `
 <div class="result-card">
-  <b>${card}</b><br><br>
+<b>${card}</b><br><br>
 
-  💳 年会費：${fee.toLocaleString()}円<br>
+💳 年会費：${fee.toLocaleString()}円<br>
 
-  ${mobileDiscountTotal ? `
-  📱 プラン割引：
-  ${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月＝${mobileDiscountTotal.toLocaleString()}円<br>
-  ` : ""}
+${discountText}
+${mobileText}
+${hikariText}
+${denkiText}
+${bonusText}
 
-  ${mobilePoint ? `
-  📱 ケータイ料金：
-  ${Math.floor(mobilePointMonthly).toLocaleString()}pt 
-${Math.round(mobileRateVal*100)}%</span>
-  ×12ヶ月＝${Math.floor(mobilePoint).toLocaleString()} pt  <span class="rate"> <br>
-  ` : ""}
-
-  ${hikariPoint ? `
-  🌐 ドコモ光：
-  ${Math.floor(hikariPointMonthly).toLocaleString()}pt 
-  ${Math.round(hikariRate(card)*100)}%</span>
-  ×12ヶ月＝${Math.floor(hikariPoint).toLocaleString()} pt  <span class="rate"> <br>
-  ` : ""}
-
-  ${denkiPoint ? `
-  ⚡ ドコモでんき：
-  ${Math.floor(denkiPointMonthly).toLocaleString()}pt 
-  ${Math.round(denkiRate(
-    document.getElementById("area").value,
-    document.getElementById("planDenki").value,
-    document.getElementById("gas").value,
-    card
-  )*100)}%</span>
-  ×12ヶ月＝${Math.floor(denkiPoint).toLocaleString()} pt <span class="rate"> <br>
-  ` : ""}
-
-  ${bonus ? `
-  🎁 年間ご利用額特典：
-  ${bonus.toLocaleString()}円<br>
-  ` : ""}
-
-  <hr>
-
-  <b>👉 実質負担額：${Math.floor(total).toLocaleString()}円</b>
-  ${extraText}
-
-</div>
-`;
-
+<hr>
+<b>👉 実質負担額：${Math.floor(total).toLocaleString()}円</b>
+${extraText}
+</div>`;
 });
 
 document.getElementById("result").innerHTML = html;
-  document.getElementById("result").classList.remove("hidden");
+document.getElementById("result").classList.remove("hidden");
 }
 </script>
 
