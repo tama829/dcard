@@ -292,6 +292,23 @@ cards.forEach(card => {
   let bonus = 0;
   let fee = annualFee(card);
 
+let extraText = "";
+
+if(total >= 0){
+  let monthlyCost = Math.floor(total / 12);
+
+  let hosho = 0;
+  if(card==="dカード") hosho = 30000;
+  if(card==="dカードGOLD U") hosho = 100000;
+  if(card==="dカードGOLD") hosho = 120000;
+  if(card==="dカードPLATINUM") hosho = 200000;
+
+  extraText = `
+  <br>
+  <b>👉 実質月額 ${monthlyCost.toLocaleString()}円でケータイ補償 ${hosho.toLocaleString()}円分</b>
+  `;
+}
+
   // --- 光 ---
   if(document.getElementById("hikari").value==="yes"){
     const feeH = Number(document.getElementById("hikariFee").value);
@@ -356,7 +373,9 @@ ${Math.floor(denkiPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(de
 
   <hr>
 
-  <b>👉 実質負担額：${Math.floor(total).toLocaleString()}円</b>
+<b>👉 実質負担額：${Math.floor(total).toLocaleString()}円</b>
+${extraText}
+
 </div>
 `;
 });
