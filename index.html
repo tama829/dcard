@@ -325,13 +325,13 @@ cards.forEach(card => {
     if(yearly >= 4000000) bonus += 10000;
   }
 
-  let total =
-    mobileDiscountTotal +
-    mobilePoint +
-    hikariPoint +
-    denkiPoint +
-    bonus -
-    fee;
+let total =
+  fee -
+  mobileDiscountTotal -
+  mobilePoint -
+  hikariPoint -
+  denkiPoint -
+  bonus;
 
 html += `
 <div class="result-card">
@@ -340,19 +340,19 @@ html += `
   💳 年会費：${fee.toLocaleString()}円<br>
 
   📱 プラン割引：
-  -${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月＝-${mobileDiscountTotal.toLocaleString()}円<br>
+  ${mobileDiscountMonthly.toLocaleString()}円 ×12ヶ月＝${mobileDiscountTotal.toLocaleString()}円<br>
 
-  📱 ケータイ料金ポイント還元：
--${Math.floor(mobilePointMonthly).toLocaleString()}pt ×12ヶ月＝-${Math.floor(mobilePoint).toLocaleString()} pt<br>
+  📱 ケータイ料金：
+${Math.floor(mobilePointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(mobilePoint).toLocaleString()} pt<br>
 
   🌐 ドコモ光：
--${Math.floor(hikariPointMonthly).toLocaleString()}pt ×12ヶ月＝-${Math.floor(hikariPoint).toLocaleString()} pt<br>
+${Math.floor(hikariPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(hikariPoint).toLocaleString()} pt<br>
 
   ⚡ ドコモでんき：
--${Math.floor(denkiPointMonthly).toLocaleString()}pt ×12ヶ月＝-${Math.floor(denkiPoint).toLocaleString()} pt<br>
+${Math.floor(denkiPointMonthly).toLocaleString()}pt ×12ヶ月＝${Math.floor(denkiPoint).toLocaleString()} pt<br>
 
   🎁 年間特典：
-  -${bonus.toLocaleString()}円<br>
+  ${bonus.toLocaleString()}円<br>
 
   <hr>
 
