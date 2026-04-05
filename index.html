@@ -149,7 +149,12 @@ button {
 
 </div>
 
+
+
 <script>
+
+let selectedCard = null;
+
 document.getElementById("hasCard").onchange = e => {
   document.getElementById("cardArea").classList.toggle("hidden", e.target.value==="no");
 };
@@ -287,15 +292,23 @@ function annualFee(card){
 
 function calc(){
 
+let backButton = "";
+
+if(selectedCard){
+  backButton = `<button onclick="resetView()">← 戻る</button><br><br>`;
+}
+
   const plan = document.getElementById("plan").value;
   const mobileFee = Number(document.getElementById("mobileFee").value);
   const usage = Number(document.getElementById("usage").value);
 
   const cards = ["dカード","dカードGOLD","dカードGOLD U","dカードPLATINUM"];
 
-  let html = "<h2>診断結果</h2>";
+  let html = "<h2>診断結果</h2>" + backButton;
 
 cards.forEach(card => {
+
+  if(selectedCard && selectedCard !== card) return;
 
   let mobileDiscountMonthly = mobileDiscount(plan, card);
   let mobileDiscountTotal = mobileDiscountMonthly * 12;
@@ -402,12 +415,27 @@ ${bonusText}
 <hr>
 <b>👉 実質負担額：${Math.floor(total).toLocaleString()}円</b>
 ${extraText}
+
+<br><br>
+<button onclick="showDetail('${card}')">詳細</button>
+
 </div>`;
 });
 
 document.getElementById("result").innerHTML = html;
 document.getElementById("result").classList.remove("hidden");
 }
+
+function resetView(){
+  selectedCard = null;
+  calc();
+}
+
+function resetView(){
+  selectedCard = null;
+  calc();
+}
+
 </script>
 
 </body>
