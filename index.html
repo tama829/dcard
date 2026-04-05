@@ -137,7 +137,19 @@ button {
 
 <script>
 
+let selectedCards = [];
+let isDetailView = false;
+
 let selectedCard = null;
+
+function toggleCard(card){
+  if(selectedCards.includes(card)){
+    selectedCards = selectedCards.filter(c => c !== card);
+  }else{
+    selectedCards.push(card);
+  }
+  calc();
+}
 
 document.getElementById("hikari").onchange = e => {
   document.getElementById("hikariFee").classList.toggle("hidden", e.target.value==="no");
@@ -272,6 +284,15 @@ function annualFee(card){
 
 function calc(){
 
+let detailButton = "";
+
+if(!isDetailView){
+  detailButton = `
+  <br>
+  <button onclick="showSelected()">詳細</button>
+  `;
+}
+
 let backButton = "";
 
 if(selectedCard){
@@ -288,7 +309,7 @@ if(selectedCard){
 
 cards.forEach(card => {
 
-  if(selectedCard && selectedCard !== card) return;
+  if(isDetailView && !selectedCards.includes(card)) return;
 
   let mobileDiscountMonthly = mobileDiscount(plan, card);
   let mobileDiscountTotal = mobileDiscountMonthly * 12;
@@ -381,7 +402,9 @@ ${bonus.toLocaleString()}円<br>` : "";
   }
 
   html += `
-<div class="result-card">
+
+<div class="result-card ${selectedCards.includes(card) ? 'selected' : ''}">
+
 <b>${card}</b><br><br>
 
 💳 年会費：${fee.toLocaleString()}円<br>
@@ -397,7 +420,12 @@ ${bonusText}
 ${extraText}
 
 <br><br>
-<button onclick="showDetail('${card}')">詳細</button>
+
+<label>
+  <input type="checkbox" onchange="toggleCard('${card}')" 
+    ${selectedCards.includes(card) ? 'checked' : ''}>
+  選択する
+</label>
 
 </div>`;
 });
