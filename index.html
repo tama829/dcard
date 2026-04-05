@@ -174,7 +174,7 @@ function mobileRate(plan, card){
 
   if(highPlans.includes(plan)){
     if(["dカードPLATINUM","dカードGOLD","dカードGOLD U"].includes(card)) return 0.01;
-    return 0.005;
+    if(card==="dカード") return 0.005;
   }
 }
 
