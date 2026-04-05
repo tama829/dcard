@@ -53,6 +53,29 @@ button {
   border-radius: 6px;
   font-size: 12px;
 }
+
+.selected {
+  border: 2px solid #e6002d;
+}
+
+.result-card {
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 10px;
+  background: #f0f3ff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.result-card:hover {
+  opacity: 0.9;
+}
+
+.selected {
+  border: 2px solid #e6002d;
+  background: #ffecef;
+}
+
 </style>
 </head>
 
@@ -139,8 +162,6 @@ button {
 
 let selectedCards = [];
 let isDetailView = false;
-
-let selectedCard = null;
 
 function toggleCard(card){
   if(selectedCards.includes(card)){
@@ -295,7 +316,7 @@ if(!isDetailView){
 
 let backButton = "";
 
-if(selectedCard){
+if(isDetailView){
   backButton = `<button onclick="resetView()">← 戻る</button><br><br>`;
 }
 
@@ -403,7 +424,7 @@ ${bonus.toLocaleString()}円<br>` : "";
 
   html += `
 
-<div class="result-card ${selectedCards.includes(card) ? 'selected' : ''}">
+<div class="result-card ${selectedCards.includes(card) ? 'selected' : ''}" onclick="toggleCard('${card}')">
 
 <b>${card}</b><br><br>
 
@@ -421,26 +442,25 @@ ${extraText}
 
 <br><br>
 
-<label>
-  <input type="checkbox" onchange="toggleCard('${card}')" 
-    ${selectedCards.includes(card) ? 'checked' : ''}>
-  選択する
-</label>
-
 </div>`;
 });
 
-document.getElementById("result").innerHTML = html;
+document.getElementById("result").innerHTML = html + detailButton;
+
 document.getElementById("result").classList.remove("hidden");
 }
 
 function resetView(){
-  selectedCard = null;
+  isDetailView = false;
   calc();
 }
 
-function showDetail(card){
-  selectedCard = card;
+function showSelected(){
+  if(selectedCards.length === 0){
+    alert("カードを選択してください");
+    return;
+  }
+  isDetailView = true;
   calc();
 }
 
